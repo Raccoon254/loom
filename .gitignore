@@ -104,6 +104,16 @@ dist
 .temp
 .cache
 
+
+commands.txt
+#  Database
+*.sqlite
+*.db
+*.sql
+*.toml
+*-journal
+*.prisma
+
 # Docusaurus cache and generated files
 .docusaurus
 
