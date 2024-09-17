@@ -7,7 +7,7 @@ export class User extends BaseModel {
     { name: 'id', type: 'number', isUnique: true },
     { name: 'name', type: 'string' },
     { name: 'email', type: 'string', isUnique: true },
-    { name: 'createdAt', type: 'date', default: 'now()' }
+    { name: 'createdAt', type: 'date', default: 'now()' },
   ];
   static relations: Relation[] = [
     { name: 'posts', type: 'hasMany', model: 'Post' }
@@ -16,7 +16,6 @@ export class User extends BaseModel {
   id!: number;
   name!: string;
   email!: string;
-  nickName!: string;
   createdAt!: Date;
   posts?: Post[];
 

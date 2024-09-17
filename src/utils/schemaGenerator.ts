@@ -21,7 +21,7 @@ generator client {
       const modelPath = path.join(modelsDir, file);
       const modelModule = require(modelPath);
 
-      // Assuming that each model file exports the class as default
+      // Each model file should export a class a default
       const modelClass = Object.values(modelModule)[0] as typeof BaseModel;
 
       if (typeof modelClass.getSchemaDefinition === 'function') {
