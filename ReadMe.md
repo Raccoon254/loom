@@ -79,24 +79,47 @@ Here’s a sample of how you can structure your models in Loom:
 
 **`src/models/User.ts`**:
 ```typescript
-import { PrismaClient, User as PrismaUser } from '@prisma/client';
+import { BaseModel, Property, Relation } from './BaseModel';
+import { Post } from './Post';
 
-const prisma = new PrismaClient();
+export class User extends BaseModel {
+  static modelName = 'User';
+  static properties: Property[] = [
+    { name: 'id', type: 'number', isUnique: true },
+    { name: 'name', type: 'string' },
+    { name: 'email', type: 'string', isUnique: true },
+    { name: 'createdAt', type: 'date', default: 'now()' },
+  ];
+  static relations: Relation[] = [
+    { name: 'posts', type: 'hasMany', model: 'Post' }
+  ];
 
-export class User {
-  id: number;
-  name: string;
-  email: string;
+  id!: number;
+  name!: string;
+  email!: string;
+  createdAt!: Date;
+  posts?: Post[];
 
-  constructor(user: PrismaUser) {
-    this.id = user.id;
-    this.name = user.name;
-    this.email = user.email;
+  static async findByEmail(email: string): Promise<User | null> {
+    const user = await this.prismaModel.findUnique({
+      where: { email },
+    });
+    return user ? Object.assign(new User(), user) : null;
   }
 
-  static async findById(id: number): Promise<User | null> {
-    const user = await prisma.user.findUnique({ where: { id } });
-    return user ? new User(user) : null;
+  static async createUser(data: { name: string; email: string }): Promise<User> {
+    const user = await this.prismaModel.create({
+      data,
+    });
+    return Object.assign(new User(), user);
+  }
+
+  static async getUserWithPosts(id: number): Promise<User | null> {
+    const user = await this.prismaModel.findUnique({
+      where: { id },
+      include: { posts: true },
+    });
+    return user ? Object.assign(new User(), user) : null;
   }
 }
 ```
@@ -107,21 +130,18 @@ You can define routes using Express to handle requests and interact with your mo
 
 **`src/routes/userRoutes.ts`**:
 ```typescript
-import express from 'express';
-import { User } from '../models/User';
+import { Router } from 'express';
+import { UserController } from '../controllers/UserController';
 
-const router = express.Router();
+const router = Router();
+const userController = new UserController();
 
-router.get('/users', async (req, res) => {
-  const users = await User.findAll();
-  res.json(users);
-});
-
-router.post('/users', async (req, res) => {
-  const { name, email } = req.body;
-  const user = await User.create({ name, email });
-  res.json(user);
-});
+router.get('/', (req, res) => userController.index(req, res));
+router.get('/:id', (req, res) => userController.show(req, res));
+router.post('/', (req, res) => userController.store(req, res));
+router.put('/:id', (req, res) => userController.update(req, res));
+router.delete('/:id', (req, res) => userController.destroy(req, res));
+router.get('/:id/posts', (req, res) => userController.getUserPosts(req, res));
 
 export default router;
 ```
