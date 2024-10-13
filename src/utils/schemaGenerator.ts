@@ -1,11 +1,35 @@
 import fs from 'fs';
 import path from 'path';
 import { BaseModel } from '../models/BaseModel'; // Import BaseModel
+import env from 'dotenv';
 
 export function generatePrismaSchema() {
   console.log('Starting Prisma schema generation...');
   const modelsDir = path.join(__dirname, '..', 'models');
   console.log(`Looking for models in: ${modelsDir}`);
+  env.config();
+  const databaseFilePath = process.env.DATABASE_URL;
+
+  if (!databaseFilePath) {
+    console.log('DATABASE_URL environment variable is not set');
+    return;
+  }
+
+  if (databaseFilePath.startsWith('file:')) {
+    let dbPath = databaseFilePath.slice(5); // Removes 'file:'
+    if (!path.isAbsolute(dbPath)) {
+      dbPath = path.resolve(path.join(__dirname, '..', dbPath));
+    }
+    if (!fs.existsSync(dbPath)) {
+      const dbDir = path.dirname(dbPath);
+      console.log('Creating database file at :', dbPath);
+      fs.mkdirSync(dbDir, { recursive: true });
+      fs.writeFileSync(dbPath, '');
+      console.log('Database file created at :', dbPath);
+    } else {
+      console.log('Database file already exists at :', dbPath);
+    }
+  }
 
   let schemaContent = `
 datasource db {
