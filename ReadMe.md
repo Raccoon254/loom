@@ -45,7 +45,7 @@ Make sure you have the following installed on your machine:
 4. Initialize Prisma:
 
    ```bash
-   npx prisma migrate dev --name init
+   npx prisma init --datasource-provider sqlite
    ```
 
 5. Run the development server:

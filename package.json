@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "dev": "nodemon --exec ts-node src/index.ts",
+    "dev": "npm run db:generate && nodemon --exec ts-node src/index.ts",
+    "db:generate": "ts-node src/utils/generateSchema.ts && npx prisma generate",
     "build": "tsc",
     "generate": "prisma generate",
     "migrate": "prisma migrate dev"
