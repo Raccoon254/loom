@@ -20,21 +20,22 @@ export function generatePrismaSchema() {
     if (!path.isAbsolute(dbPath)) {
       dbPath = path.resolve(path.join(__dirname, '..', dbPath));
     }
-    if (!fs.existsSync(dbPath)) {
-      const dbDir = path.dirname(dbPath);
-      console.log('Creating database file at :', dbPath);
+    const dbDir = path.join(__dirname, '..', '..', 'prisma', 'database', path.basename(dbPath));
+    const dbFilePath = path.join(dbDir, path.basename(dbPath));
+    if (!fs.existsSync(dbFilePath)) {
+      console.log('Creating database file at :', dbFilePath);
       fs.mkdirSync(dbDir, { recursive: true });
-      fs.writeFileSync(dbPath, '');
-      console.log('Database file created at :', dbPath);
+      fs.writeFileSync(dbFilePath, '');
+      console.log('Database file created at :', dbFilePath);
     } else {
-      console.log('Database file already exists at :', dbPath);
+      console.log('Database file already exists at :', dbFilePath);
     }
   }
 
   let schemaContent = `
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./database/dev.db"
 }
 
 generator client {
